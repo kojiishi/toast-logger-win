@@ -1,0 +1,22 @@
+[package]
+name = "toast-logger-win"
+version = "0.1.0"
+edition = "2024"
+authors = ["Koji Ishii <kojiishi@gmail.com>"]
+description = "Rust's `log` crate logger that sends logging output to the Windows Toast notifications."
+keywords = ["log", "windows", "notifications", "toast"]
+repository = "https://github.com/kojiishi/toast-logger-win"
+readme = "README.md"
+license = "Apache-2.0"
+exclude = [".github", ".gitignore", "hooks", ".vscode"]
+
+[dependencies]
+anyhow = "1.0.98"
+log = { version = "0.4.27", features = ["std"] }
+
+[dependencies.windows]
+version = "0.60.0"
+features = [
+    "Data_Xml_Dom",
+    "UI_Notifications",
+]
