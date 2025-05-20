@@ -20,7 +20,7 @@ struct ToastLoggerConfig {
 impl Default for ToastLoggerConfig {
     fn default() -> Self {
         Self {
-            max_level: log::LevelFilter::Warn,
+            max_level: log::LevelFilter::Error,
             is_auto_flush: true,
             application_id: ToastNotifier::DEFAULT_APP_ID.into(),
             formatter: Box::new(Self::default_formatter),
@@ -283,7 +283,7 @@ mod tests {
     #[test]
     fn builder_default() {
         let builder = ToastLogger::builder();
-        assert_eq!(builder.config.max_level, log::LevelFilter::Warn);
+        assert_eq!(builder.config.max_level, log::LevelFilter::Error);
         assert!(builder.config.is_auto_flush);
         assert_eq!(builder.config.application_id, ToastNotifier::DEFAULT_APP_ID);
     }
@@ -291,20 +291,20 @@ mod tests {
     #[test]
     fn max_level() -> anyhow::Result<()> {
         let logger = ToastLogger::builder()
-            .max_level(log::LevelFilter::Warn)
+            .max_level(log::LevelFilter::Info)
             .auto_flush(false)
             .build_logger()?;
         let info = log::Record::builder()
             .level(log::Level::Info)
             .args(format_args!("test"))
             .build();
-        let warn = log::Record::builder()
-            .level(log::Level::Warn)
+        let debug = log::Record::builder()
+            .level(log::Level::Debug)
             .args(format_args!("test"))
             .build();
-        logger.log(&info);
+        logger.log(&debug);
         assert_eq!(logger.lines_len(), 0);
-        logger.log(&warn);
+        logger.log(&info);
         assert_eq!(logger.lines_len(), 1);
         Ok(())
     }
