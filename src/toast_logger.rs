@@ -55,21 +55,29 @@ impl ToastLoggerBuilder {
     /// ```no_run
     /// # use toast_logger_win::ToastLogger;
     /// # fn test() -> anyhow::Result<()> {
-    /// ToastLogger::builder().init_logger()?;
+    /// ToastLogger::builder().init()?;
     /// # Ok(())
     /// # }
     /// ```
-    pub fn init_logger(&mut self) -> anyhow::Result<()> {
+    pub fn init(&mut self) -> anyhow::Result<()> {
         ToastLogger::init(self.build_config())
+    }
+
+    #[deprecated(since = "0.2.0", note = "Use `init()` instead")]
+    pub fn init_logger(&mut self) -> anyhow::Result<()> {
+        self.init()
+    }
+
+    /// Build a `ToastLogger`.
+    ///
+    /// The returned logger implements the [`Log`] trait
+    /// and can be installed manually or nested within another logger.
+    pub fn build(&mut self) -> anyhow::Result<ToastLogger> {
+        ToastLogger::new(self.build_config())
     }
 
     fn build_config(&mut self) -> ToastLoggerConfig {
         mem::take(&mut self.config)
-    }
-
-    #[cfg(test)]
-    fn build_logger(&mut self) -> anyhow::Result<ToastLogger> {
-        ToastLogger::new(self.build_config())
     }
 
     /// Set the maximum level of logs to be displayed.
@@ -95,7 +103,7 @@ impl ToastLoggerBuilder {
     /// ToastLogger::builder()
     ///     .max_level(log::LevelFilter::Info)
     ///     .auto_flush(false)
-    ///     .init_logger()?;
+    ///     .init()?;
     /// log::info!("Test info log");
     /// log::info!("Test info log 2");
     /// ToastLogger::flush()?;  // Shows only one notification with both logs.
@@ -137,7 +145,7 @@ impl ToastLoggerBuilder {
     ///             _ => write!(buf, "{}: {}", record.level(), record.args()),
     ///         }
     ///     })
-    ///     .init_logger()?;
+    ///     .init()?;
     /// # Ok(())
     /// # }
     /// ```
@@ -158,7 +166,7 @@ impl ToastLoggerBuilder {
 /// # pub fn test() -> anyhow::Result<()> {
 ///   ToastLogger::builder()
 ///       .max_level(log::LevelFilter::Info)
-///       .init_logger()?;
+///       .init()?;
 ///   log::info!("Test info log");  // Shows a Windows Toast Notification.
 /// #  Ok(())
 /// # }
@@ -290,7 +298,7 @@ mod tests {
         let logger = ToastLogger::builder()
             .max_level(log::LevelFilter::Info)
             .auto_flush(false)
-            .build_logger()?;
+            .build()?;
         let info = log::Record::builder()
             .level(log::Level::Info)
             .args(format_args!("test"))
