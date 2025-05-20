@@ -24,7 +24,7 @@ ToastLogger::builder()
 log::info!("Hello, world");
 ```
 
-Please see the [API documents at docs.rs][docs] for more details.
+Please see the [API documentation at docs.rs][docs] for more details.
 
 [`log`]: https://crates.io/crates/log
 [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview

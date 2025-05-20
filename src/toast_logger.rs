@@ -131,8 +131,7 @@ impl ToastLoggerBuilder {
     // https://docs.rs/env_logger/0.11.8/env_logger/#using-a-custom-format
     /// Set a custom formatter function that produces a string from [`log::Record`].
     ///
-    /// The default formatter displays the [`log::Level::Info`] logs as is,
-    /// and other levels with the "level: " prefix.
+    /// The default formatter displays the logs with their "level: " as prefixes.
     /// # Examples
     /// ```no_run
     /// # use std::fmt;
