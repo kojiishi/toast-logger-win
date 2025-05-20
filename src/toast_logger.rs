@@ -30,10 +30,7 @@ impl Default for ToastLoggerConfig {
 
 impl ToastLoggerConfig {
     fn default_formatter(buf: &mut dyn fmt::Write, record: &log::Record) -> fmt::Result {
-        match record.level() {
-            log::Level::Info => write!(buf, "{}", record.args()),
-            _ => write!(buf, "{}: {}", record.level(), record.args()),
-        }
+        write!(buf, "{}: {}", record.level(), record.args())
     }
 
     fn create_notifier(&self) -> anyhow::Result<ToastNotifier> {
