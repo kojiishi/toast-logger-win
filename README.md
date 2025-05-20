@@ -12,9 +12,8 @@
 # toast-logger-win
 
 Rust's [`log`] crate logger that sends logging output
-to the Windows Toast notifications.
-
-This is handy when you want a small amount of output
+to the [Windows Toast Notifications].
+This is handy when you want to output a small amount of text
 from UI-less applications on Windows.
 
 The following example shows a toast notification saying "Hello, world".
@@ -25,6 +24,7 @@ ToastLogger::builder()
 log::info!("Hello, world");
 ```
 
-For more details, please see [docs.rs][docs].
+Please see the [API documents at docs.rs][docs] for more details.
 
 [`log`]: https://crates.io/crates/log
+[Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview

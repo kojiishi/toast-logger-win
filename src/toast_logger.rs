@@ -88,6 +88,9 @@ impl ToastLoggerBuilder {
     /// logs are appended to an internal buffer
     /// without being shown,
     /// until [`ToastLogger::flush()`] is called.
+    ///
+    /// The default value is `true`,
+    /// which shows a toast notification on each logging.
     /// # Examples
     /// ```no_run
     /// # use toast_logger_win::ToastLogger;
@@ -110,10 +113,10 @@ impl ToastLoggerBuilder {
     /// Set the application ID for the Toast Notification.
     ///
     /// This is the application ID passed to the Windows
-    /// [`CreateToastNotifier`](https://learn.microsoft.com/en-us/uwp/api/windows.ui.notifications.toastnotificationmanager.createtoastnotifier#windows-ui-notifications-toastnotificationmanager-createtoastnotifier(system-string))
+    /// [`CreateToastNotifier`](https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotificationmanager.createtoastnotifier#windows-ui-notifications-toastnotificationmanager-createtoastnotifier(system-string))
     /// API.
     /// Please also see the ["Find the Application User Model ID of an installed app"
-    /// article](https://learn.microsoft.com/en-us/windows/configuration/find-the-application-user-model-id-of-an-installed-app)
+    /// article](https://learn.microsoft.com/windows/configuration/find-the-application-user-model-id-of-an-installed-app)
     /// to find the Application User Model ID, or AUMID in short.
     pub fn application_id(&mut self, application_id: &str) -> &mut Self {
         self.config.application_id = application_id.into();
@@ -121,9 +124,10 @@ impl ToastLoggerBuilder {
     }
 
     // https://docs.rs/env_logger/0.11.8/env_logger/#using-a-custom-format
-    /// Set a formatter function that produces a string from [`log::Record`].
-    /// By default, the [`log::Level::Info`] logs are displayed as is,
-    /// and other levels are displayed with the "level: " prefix.
+    /// Set a custom formatter function that produces a string from [`log::Record`].
+    ///
+    /// The default formatter displays the [`log::Level::Info`] logs as is,
+    /// and other levels with the "level: " prefix.
     /// # Examples
     /// ```no_run
     /// # use std::fmt;
@@ -171,7 +175,8 @@ pub struct ToastLogger {
 static INSTANCE: OnceLock<ToastLogger> = OnceLock::new();
 
 impl ToastLogger {
-    /// Returns a [`ToastLoggerBuilder`] instance.
+    /// Returns a [`ToastLoggerBuilder`] instance
+    /// that can build a [`ToastLogger`] with various configurations.
     pub fn builder() -> ToastLoggerBuilder {
         ToastLoggerBuilder::new()
     }
@@ -194,11 +199,12 @@ impl ToastLogger {
         })
     }
 
-    /// When [`ToastLoggerBuilder::auto_flush()`] is set to `false`,
-    /// all logs are appended to an internal buffer
-    /// without being shown.
-    /// Call this function to show a toast notification with
-    /// all logs in the buffer.
+    /// Flush the internal log buffer.
+    /// If the buffer is not empty,
+    /// this function shows one toast notification
+    /// by concatenating all logs in the buffer.
+    ///
+    /// Please see [`ToastLoggerBuilder::auto_flush()`] for more details.
     pub fn flush() -> anyhow::Result<()> {
         let logger = INSTANCE
             .get()
