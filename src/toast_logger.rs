@@ -141,7 +141,7 @@ impl ToastLoggerBuilder {
     /// ToastLogger::builder()
     ///     .format(|buf: &mut dyn fmt::Write, record: &log::Record| {
     ///         match record.level() {
-    ///             log::Level::Info => write!(buf, "{}", record.args()),
+    ///             log::Level::Info => buf.write_fmt(*record.args()),
     ///             _ => write!(buf, "{}: {}", record.level(), record.args()),
     ///         }
     ///     })
@@ -217,9 +217,12 @@ impl ToastLogger {
         logger.flush_result()
     }
 
-    #[cfg(test)]
-    fn lines_len(&self) -> usize {
-        self.lines.lock().unwrap().len()
+    fn take_lines(&self) -> Option<Vec<String>> {
+        let mut lines = self.lines.lock().unwrap();
+        if lines.is_empty() {
+            return None;
+        }
+        Some(mem::take(&mut *lines))
     }
 
     fn log_result(&self, record: &log::Record) -> anyhow::Result<()> {
@@ -245,15 +248,11 @@ impl ToastLogger {
     }
 
     fn flush_result(&self) -> anyhow::Result<()> {
-        let lines = {
-            let mut lines = self.lines.lock().unwrap();
-            if lines.is_empty() {
-                return Ok(());
-            }
-            mem::take(&mut *lines)
-        };
-        let text = lines.join("\n");
-        self.show_notification(&text)
+        if let Some(lines) = self.take_lines() {
+            let text = lines.join("\n");
+            return self.show_notification(&text);
+        }
+        Ok(())
     }
 
     fn show_notification(&self, text: &str) -> anyhow::Result<()> {
@@ -308,9 +307,25 @@ mod tests {
             .args(format_args!("test"))
             .build();
         logger.log(&debug);
-        assert_eq!(logger.lines_len(), 0);
+        assert_eq!(logger.take_lines(), None);
         logger.log(&info);
-        assert_eq!(logger.lines_len(), 1);
+        assert_eq!(logger.take_lines().unwrap_or_default(), ["INFO: test"]);
+        Ok(())
+    }
+
+    #[test]
+    fn format() -> anyhow::Result<()> {
+        let logger = ToastLogger::builder()
+            .max_level(log::LevelFilter::Info)
+            .auto_flush(false)
+            .format(|buf: &mut dyn fmt::Write, record: &log::Record| buf.write_fmt(*record.args()))
+            .build()?;
+        let info = log::Record::builder()
+            .level(log::Level::Info)
+            .args(format_args!("test"))
+            .build();
+        logger.log(&info);
+        assert_eq!(logger.take_lines().unwrap_or_default(), ["test"]);
         Ok(())
     }
 }

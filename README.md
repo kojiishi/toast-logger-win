@@ -11,9 +11,9 @@
 
 # toast-logger-win
 
-Rust's [`log`] crate logger that sends logging output
+`ToastLogger` is a [`log`] crate logger that sends logging output
 to the [Windows Toast Notifications].
-This is handy when you want to output a small amount of text
+This is handy when you want to present a small amount of text to users
 from UI-less applications on Windows.
 
 The following example shows a toast notification saying "Hello, world".
