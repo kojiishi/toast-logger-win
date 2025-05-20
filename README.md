@@ -20,7 +20,7 @@ The following example shows a toast notification saying "Hello, world".
 ```rust
 ToastLogger::builder()
     .max_level(log::LevelFilter::Info)
-    .init_logger()?;
+    .init()?;
 log::info!("Hello, world");
 ```
 
