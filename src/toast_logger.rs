@@ -129,7 +129,7 @@ impl ToastLoggerBuilder {
     /// This is the application ID passed to the Windows [`CreateToastNotifier`] API.
     /// Please also see the [Application User Model ID][AUMID],
     /// and the "[Find the Application User Model ID of an installed app]".
-    /// 
+    ///
     /// [AUMID]: https://learn.microsoft.com/windows/win32/shell/appids
     /// [`CreateToastNotifier`]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotificationmanager.createtoastnotifier#windows-ui-notifications-toastnotificationmanager-createtoastnotifier(system-string)
     /// [Find the Application User Model ID of an installed app]: https://learn.microsoft.com/windows/configuration/find-the-application-user-model-id-of-an-installed-app

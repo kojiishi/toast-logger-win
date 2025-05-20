@@ -1,20 +1,27 @@
-#[cfg(feature = "winrt-toast")]
-use toast_logger_win::Notification;
-use toast_logger_win::ToastLogger;
+use std::{env, time::Duration};
+
+use toast_logger_win::{Notification, ToastLogger};
 
 pub fn main() -> anyhow::Result<()> {
+    let args: Vec<String> = env::args().skip(1).collect();
+    let duration = if args.is_empty() {
+        Duration::ZERO
+    } else {
+        Duration::from_secs(args[0].parse()?)
+    };
+
     let mut builder = ToastLogger::builder();
-    #[cfg(feature = "winrt-toast")]
-    let message = {
-        builder.create_notification(|records| {
+    let message = if duration.is_zero() {
+        "This message shouldn't expire".into()
+    } else {
+        let message = format!("This message should expire in {duration:?}.");
+        builder.create_notification(move |records| {
             let mut notification = Notification::new_with_records(records)?;
-            notification.expires_in(std::time::Duration::from_secs(3));
+            notification.expires_in(duration)?;
             Ok(notification)
         });
-        "This message should expire in 3 seconds"
+        message
     };
-    #[cfg(not(feature = "winrt-toast"))]
-    let message = "This message shouldn't expire";
     builder.max_level(log::LevelFilter::Info).init()?;
 
     log::info!("{}", message);

@@ -20,6 +20,8 @@ version = "0.61.1"
 optional = true
 features = [
     "Data_Xml_Dom",
+    "Foundation",
+    "Globalization",
     "UI_Notifications",
 ]
 
