@@ -5,7 +5,7 @@ use std::{
 
 use log::Log;
 
-use crate::{ToastNotification, ToastNotifier};
+use crate::win::{ToastNotification, ToastNotifier};
 
 type LogRecordFormatter =
     dyn Fn(&mut dyn fmt::Write, &log::Record) -> fmt::Result + Send + Sync + 'static;

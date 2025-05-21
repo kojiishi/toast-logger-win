@@ -16,8 +16,7 @@
 //! ```
 //! [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
 
-mod toast_win;
-pub(crate) use toast_win::*;
+pub(crate) mod win;
 
 mod toast_logger;
 pub use toast_logger::*;
