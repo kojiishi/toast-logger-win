@@ -1,15 +1,23 @@
+//!
+//! Thin wrappers for the Windows APIs.
+//!
+
 mod winapi {
     pub use windows::UI::Notifications::{
         ToastNotification, ToastNotificationManager, ToastNotifier, ToastTemplateType,
     };
 }
 
+/// A thin wrapper for the [`windows::UI::Notifications::ToastNotification`].
+///
+/// [`windows::UI::Notifications::ToastNotification`]: https://microsoft.github.io/windows-docs-rs/doc/windows/UI/Notifications/struct.ToastNotification.html
 #[derive(Debug)]
 pub struct ToastNotification {
     notification: winapi::ToastNotification,
 }
 
 impl ToastNotification {
+    /// Create a `ToastNotification` with the given text.
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
         let template = winapi::ToastTemplateType::ToastText01;
         let toast_xml = winapi::ToastNotificationManager::GetTemplateContent(template)?;
@@ -20,6 +28,9 @@ impl ToastNotification {
     }
 }
 
+/// A thin wrapper for the [`windows::UI::Notifications::ToastNotifier`].
+///
+/// [`windows::UI::Notifications::ToastNotifier`]: https://microsoft.github.io/windows-docs-rs/doc/windows/UI/Notifications/struct.ToastNotifier.html
 #[derive(Debug)]
 pub struct ToastNotifier {
     notifier: winapi::ToastNotifier,

@@ -39,6 +39,15 @@ impl ToastLoggerConfig {
 }
 
 /// Builder for [`ToastLogger`].
+///
+/// # Examples
+/// ```no_run
+/// # use toast_logger_win::ToastLogger;
+/// # fn test() -> anyhow::Result<()> {
+/// ToastLogger::builder().init()?;
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Default)]
 pub struct ToastLoggerBuilder {
     config: ToastLoggerConfig,
@@ -51,14 +60,6 @@ impl ToastLoggerBuilder {
 
     /// Initialize the [`log`] crate to use the [`ToastLogger`]
     /// with the configurations set to this builder.
-    /// # Examples
-    /// ```no_run
-    /// # use toast_logger_win::ToastLogger;
-    /// # fn test() -> anyhow::Result<()> {
-    /// ToastLogger::builder().init()?;
-    /// # Ok(())
-    /// # }
-    /// ```
     pub fn init(&mut self) -> anyhow::Result<()> {
         ToastLogger::init(self.build_config())
     }
@@ -159,7 +160,8 @@ impl ToastLoggerBuilder {
 }
 
 /// [`log`] crate logger that sends the logging output
-/// to the Windows Toast Notifications.
+/// to the [Windows Toast Notifications].
+///
 /// # Examples
 /// ```no_run
 /// # use toast_logger_win::ToastLogger;
@@ -171,6 +173,7 @@ impl ToastLoggerBuilder {
 /// #  Ok(())
 /// # }
 /// ```
+/// [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
 pub struct ToastLogger {
     config: ToastLoggerConfig,
     notifier: ToastNotifier,
