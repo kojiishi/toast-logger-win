@@ -7,14 +7,24 @@ use log::Log;
 
 use crate::win::{ToastNotification, ToastNotifier};
 
+/// A struct to own copies of parts of `log::Record` for buffering.
+#[derive(Debug, PartialEq, Eq)]
+pub struct BufferedRecord {
+    pub level: log::Level,
+    pub args: String,
+}
+
 type LogRecordFormatter =
     dyn Fn(&mut dyn fmt::Write, &log::Record) -> fmt::Result + Send + Sync + 'static;
+type NotificationCreator =
+    dyn Fn(&[BufferedRecord]) -> anyhow::Result<Option<ToastNotification>> + Send + Sync + 'static;
 
 struct ToastLoggerConfig {
     max_level: log::LevelFilter,
     is_auto_flush: bool,
     application_id: String,
     formatter: Box<LogRecordFormatter>,
+    create_notification: Box<NotificationCreator>,
 }
 
 impl Default for ToastLoggerConfig {
@@ -24,6 +34,7 @@ impl Default for ToastLoggerConfig {
             is_auto_flush: true,
             application_id: ToastNotifier::DEFAULT_APP_ID.into(),
             formatter: Box::new(Self::default_formatter),
+            create_notification: Box::new(ToastLogger::default_create_notification),
         }
     }
 }
@@ -157,6 +168,17 @@ impl ToastLoggerBuilder {
         self.config.formatter = Box::new(formatter);
         self
     }
+
+    pub fn create_notification<F>(&mut self, create: F) -> &mut Self
+    where
+        F: Fn(&[BufferedRecord]) -> anyhow::Result<Option<ToastNotification>>
+            + Send
+            + Sync
+            + 'static,
+    {
+        self.config.create_notification = Box::new(create);
+        self
+    }
 }
 
 /// [`log`] crate logger that sends the logging output
@@ -177,7 +199,7 @@ impl ToastLoggerBuilder {
 pub struct ToastLogger {
     config: ToastLoggerConfig,
     notifier: ToastNotifier,
-    lines: Mutex<Vec<String>>,
+    records: Mutex<Vec<BufferedRecord>>,
 }
 
 static INSTANCE: OnceLock<ToastLogger> = OnceLock::new();
@@ -203,7 +225,7 @@ impl ToastLogger {
         Ok(Self {
             config,
             notifier,
-            lines: Mutex::new(Vec::new()),
+            records: Mutex::new(Vec::new()),
         })
     }
 
@@ -220,12 +242,24 @@ impl ToastLogger {
         logger.flush_result()
     }
 
-    fn take_lines(&self) -> Option<Vec<String>> {
-        let mut lines = self.lines.lock().unwrap();
-        if lines.is_empty() {
+    pub fn default_create_notification(
+        records: &[BufferedRecord],
+    ) -> anyhow::Result<Option<ToastNotification>> {
+        let text = records
+            .iter()
+            .map(|r| r.args.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        let notification = ToastNotification::new_with_text(&text)?;
+        Ok(Some(notification))
+    }
+
+    fn take_records(&self) -> Option<Vec<BufferedRecord>> {
+        let mut records = self.records.lock().unwrap();
+        if records.is_empty() {
             return None;
         }
-        Some(mem::take(&mut *lines))
+        Some(mem::take(&mut *records))
     }
 
     fn log_result(&self, record: &log::Record) -> anyhow::Result<()> {
@@ -238,29 +272,33 @@ impl ToastLogger {
         if text.is_empty() {
             return Ok(());
         }
+        let buffered_record = BufferedRecord {
+            level: record.level(),
+            args: text,
+        };
 
         if self.config.is_auto_flush {
-            self.show_notification(&text)?;
+            self.show_notification(&[buffered_record])?;
             return Ok(());
         }
 
         // If not auto-flushing, append to the internal buffer.
-        let mut lines = self.lines.lock().unwrap();
-        lines.push(text);
+        let mut records = self.records.lock().unwrap();
+        records.push(buffered_record);
         Ok(())
     }
 
     fn flush_result(&self) -> anyhow::Result<()> {
-        if let Some(lines) = self.take_lines() {
-            let text = lines.join("\n");
-            return self.show_notification(&text);
+        if let Some(records) = self.take_records() {
+            return self.show_notification(&records);
         }
         Ok(())
     }
 
-    fn show_notification(&self, text: &str) -> anyhow::Result<()> {
-        let notification = ToastNotification::new_with_text(text)?;
-        self.notifier.show(&notification)?;
+    fn show_notification(&self, records: &[BufferedRecord]) -> anyhow::Result<()> {
+        if let Some(notification) = (self.config.create_notification)(records)? {
+            self.notifier.show(&notification)?;
+        }
         Ok(())
     }
 }
@@ -310,9 +348,15 @@ mod tests {
             .args(format_args!("test"))
             .build();
         logger.log(&debug);
-        assert_eq!(logger.take_lines(), None);
+        assert_eq!(logger.take_records(), None);
         logger.log(&info);
-        assert_eq!(logger.take_lines().unwrap_or_default(), ["INFO: test"]);
+        assert_eq!(
+            logger.take_records().unwrap_or_default(),
+            [BufferedRecord {
+                level: log::Level::Info,
+                args: "INFO: test".into()
+            }]
+        );
         Ok(())
     }
 
@@ -328,7 +372,13 @@ mod tests {
             .args(format_args!("test"))
             .build();
         logger.log(&info);
-        assert_eq!(logger.take_lines().unwrap_or_default(), ["test"]);
+        assert_eq!(
+            logger.take_records().unwrap_or_default(),
+            [BufferedRecord {
+                level: log::Level::Info,
+                args: "test".into()
+            }]
+        );
         Ok(())
     }
 }
