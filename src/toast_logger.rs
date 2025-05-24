@@ -175,8 +175,9 @@ impl ToastLoggerBuilder {
     }
 }
 
-/// [`log`] crate logger that sends the logging output
-/// to the [Windows Toast Notifications].
+/// [`log`] crate logger that
+/// implements [`log::Log`] trait.
+/// It sends the logging output to the [Windows Toast Notifications].
 ///
 /// # Examples
 /// ```no_run
