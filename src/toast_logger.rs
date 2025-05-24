@@ -27,7 +27,7 @@ impl Default for ToastLoggerConfig {
             is_auto_flush: true,
             application_id: Self::DEFAULT_APP_ID.into(),
             formatter: Box::new(Self::default_formatter),
-            create_notification: Box::new(ToastLogger::default_create_notification),
+            create_notification: Box::new(Notification::new_with_records),
         }
     }
 }
@@ -234,16 +234,6 @@ impl ToastLogger {
             .get()
             .ok_or_else(|| anyhow::anyhow!("ToastLogger not initialized."))?;
         logger.flush_result()
-    }
-
-    pub fn default_create_notification(records: &[BufferedRecord]) -> anyhow::Result<Notification> {
-        let text = records
-            .iter()
-            .map(|r| r.args.as_str())
-            .collect::<Vec<_>>()
-            .join("\n");
-        let notification = Notification::new_with_text(&text)?;
-        Ok(notification)
     }
 
     fn take_records(&self) -> Option<Vec<BufferedRecord>> {

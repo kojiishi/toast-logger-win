@@ -27,6 +27,15 @@ impl Notification {
             inner: win::ToastNotification::new_with_text(text)?,
         })
     }
+
+    pub fn new_with_records(records: &[BufferedRecord]) -> anyhow::Result<Self> {
+        let text = records
+            .iter()
+            .map(|r| r.args.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        Self::new_with_text(&text)
+    }
 }
 
 /// Abstracted notifier for the `Notification`.
