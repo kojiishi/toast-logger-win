@@ -84,6 +84,14 @@ impl Notification {
     pub fn inner(&self) -> &winrt_toast::Toast {
         &self.inner
     }
+
+    /// The mutable inner [`winrt_toast::Toast`].
+    ///
+    /// Available only when the "`winrt-toast`" feature is enabled.
+    #[cfg(feature = "winrt-toast")]
+    pub fn inner_mut(&mut self) -> &mut winrt_toast::Toast {
+        &mut self.inner
+    }
 }
 
 /// Abstracted notifier for the `Notification`.
