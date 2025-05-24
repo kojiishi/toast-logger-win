@@ -29,4 +29,6 @@ default = ["dep:windows"]
 winrt-toast = ["dep:winrt-toast"]
 
 [package.metadata.docs.rs]
+# https://docs.rs/about/metadata
 default-target = "x86_64-pc-windows-msvc"
+all-features = true
