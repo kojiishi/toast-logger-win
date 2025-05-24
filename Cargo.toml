@@ -13,13 +13,20 @@ exclude = [".github", ".gitignore", "hooks", ".vscode"]
 [dependencies]
 anyhow = "1.0.98"
 log = { version = "0.4.27", features = ["std"] }
+winrt-toast = { version = "0.1.1", optional = true }
 
 [dependencies.windows]
 version = "0.61.1"
+optional = true
 features = [
     "Data_Xml_Dom",
     "UI_Notifications",
 ]
+
+[features]
+default = ["dep:windows"]
+# default = ["winrt-toast"]
+winrt-toast = ["dep:winrt-toast"]
 
 [package.metadata.docs.rs]
 default-target = "x86_64-pc-windows-msvc"

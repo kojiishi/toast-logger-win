@@ -16,6 +16,7 @@
 //! ```
 //! [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
 
+#[cfg(not(feature = "winrt-toast"))]
 pub(crate) mod win;
 
 mod notification;

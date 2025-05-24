@@ -1,5 +1,3 @@
-use crate::win;
-
 /// A struct to own copies of parts of `log::Record` for buffering.
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferedRecord {
@@ -18,15 +16,26 @@ impl BufferedRecord {
 
 /// Abstracted notification.
 pub struct Notification {
-    inner: win::ToastNotification,
+    #[cfg(not(feature = "winrt-toast"))]
+    inner: crate::win::ToastNotification,
+    #[cfg(feature = "winrt-toast")]
+    inner: winrt_toast::Toast,
 }
 
 impl Notification {
     /// Construct from a string.
+    #[cfg(not(feature = "winrt-toast"))]
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
         Ok(Self {
-            inner: win::ToastNotification::new_with_text(text)?,
+            inner: crate::win::ToastNotification::new_with_text(text)?,
         })
+    }
+
+    #[cfg(feature = "winrt-toast")]
+    pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
+        let mut toast = winrt_toast::Toast::new();
+        toast.text1(text);
+        Ok(Self { inner: toast })
     }
 
     /// Construct from a list of [`BufferedRecord`].
@@ -40,19 +49,31 @@ impl Notification {
     }
 }
 
-/// Abstracted notifier for the [`Notification`].
-pub(crate) struct Notifier {
-    inner: win::ToastNotifier,
+/// Abstracted notifier for the `Notification`.
+pub struct Notifier {
+    #[cfg(not(feature = "winrt-toast"))]
+    inner: crate::win::ToastNotifier,
+    #[cfg(feature = "winrt-toast")]
+    inner: winrt_toast::ToastManager,
 }
 
 impl Notifier {
+    #[cfg(not(feature = "winrt-toast"))]
     pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
         Ok(Self {
-            inner: win::ToastNotifier::new_with_application_id(application_id)?,
+            inner: crate::win::ToastNotifier::new_with_application_id(application_id)?,
+        })
+    }
+
+    #[cfg(feature = "winrt-toast")]
+    pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
+        Ok(Self {
+            inner: winrt_toast::ToastManager::new(application_id),
         })
     }
 
     pub fn show(&self, notification: &Notification) -> anyhow::Result<()> {
-        self.inner.show(&notification.inner)
+        self.inner.show(&notification.inner)?;
+        Ok(())
     }
 }
