@@ -16,6 +16,16 @@
 //! # }
 //! ```
 //! [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
+//!
+//! # Features
+//!
+//! * The feature `winrt-toast` switches the internal implementation
+//!   of the [Windows Toast Notifications]
+//!   from the [`windows` crate] to the [`winrt-toast` crate].
+//!   Please see the [`Notification`] for more details.
+//!
+//! [`winrt-toast` crate]: https://docs.rs/winrt-toast/latest/winrt_toast/
+//! [`windows` crate]: https://crates.io/crates/windows
 
 #[cfg(not(feature = "winrt-toast"))]
 pub(crate) mod win;

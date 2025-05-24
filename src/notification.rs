@@ -31,8 +31,21 @@ impl BufferedRecord {
 
 /// Abstracted notification.
 ///
-/// [`ToastLoggerBuilder::create_notification`] provides a hooking point
-/// before the [`Notification`] is shown.
+/// This struct is to provide a hook point before the notification is shown.
+/// Please see [`ToastLoggerBuilder::create_notification`] for
+/// how to add the hook.
+///
+/// # Underlying Implementations
+///
+/// There are two underlying implementations.
+/// * An internal implementation using the [`windows` crate].
+///   This is the default.
+/// * The [`winrt-toast` crate] implementation is
+///   enabled by the feature `winrt-toast`.
+///   This crate provides additional features and controls.
+///
+/// [`windows` crate]: https://crates.io/crates/windows
+/// [`winrt-toast` crate]: https://docs.rs/winrt-toast/latest/winrt_toast/
 pub struct Notification {
     #[cfg(not(feature = "winrt-toast"))]
     inner: crate::win::ToastNotification,
