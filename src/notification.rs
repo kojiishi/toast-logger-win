@@ -31,7 +31,7 @@ impl BufferedRecord {
 
 /// Abstracted notification.
 ///
-/// [`ToastLoggerBuilder::create_notification`] allows hooking
+/// [`ToastLoggerBuilder::create_notification`] provides a hooking point
 /// before the [`Notification`] is shown.
 pub struct Notification {
     #[cfg(not(feature = "winrt-toast"))]
@@ -75,6 +75,14 @@ impl Notification {
     #[cfg(any(feature = "winrt-toast", doc))]
     pub fn expires_in(&mut self, duration: std::time::Duration) {
         self.inner.expires_in(duration);
+    }
+
+    /// The inner [`winrt_toast::Toast`].
+    ///
+    /// Available only when the "`winrt-toast`" feature is enabled.
+    #[cfg(feature = "winrt-toast")]
+    pub fn inner(&self) -> &winrt_toast::Toast {
+        &self.inner
     }
 }
 
