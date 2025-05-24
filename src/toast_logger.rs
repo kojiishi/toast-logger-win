@@ -17,7 +17,7 @@ pub struct BufferedRecord {
 type LogRecordFormatter =
     dyn Fn(&mut dyn fmt::Write, &log::Record) -> fmt::Result + Send + Sync + 'static;
 type NotificationCreator =
-    dyn Fn(&[BufferedRecord]) -> anyhow::Result<Option<ToastNotification>> + Send + Sync + 'static;
+    dyn Fn(&[BufferedRecord]) -> anyhow::Result<ToastNotification> + Send + Sync + 'static;
 
 struct ToastLoggerConfig {
     max_level: log::LevelFilter,
@@ -171,10 +171,7 @@ impl ToastLoggerBuilder {
 
     pub fn create_notification<F>(&mut self, create: F) -> &mut Self
     where
-        F: Fn(&[BufferedRecord]) -> anyhow::Result<Option<ToastNotification>>
-            + Send
-            + Sync
-            + 'static,
+        F: Fn(&[BufferedRecord]) -> anyhow::Result<ToastNotification> + Send + Sync + 'static,
     {
         self.config.create_notification = Box::new(create);
         self
@@ -244,14 +241,14 @@ impl ToastLogger {
 
     pub fn default_create_notification(
         records: &[BufferedRecord],
-    ) -> anyhow::Result<Option<ToastNotification>> {
+    ) -> anyhow::Result<ToastNotification> {
         let text = records
             .iter()
             .map(|r| r.args.as_str())
             .collect::<Vec<_>>()
             .join("\n");
         let notification = ToastNotification::new_with_text(&text)?;
-        Ok(Some(notification))
+        Ok(notification)
     }
 
     fn take_records(&self) -> Option<Vec<BufferedRecord>> {
@@ -296,9 +293,8 @@ impl ToastLogger {
     }
 
     fn show_notification(&self, records: &[BufferedRecord]) -> anyhow::Result<()> {
-        if let Some(notification) = (self.config.create_notification)(records)? {
-            self.notifier.show(&notification)?;
-        }
+        let notification = (self.config.create_notification)(records)?;
+        self.notifier.show(&notification)?;
         Ok(())
     }
 }
