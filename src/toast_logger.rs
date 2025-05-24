@@ -166,6 +166,17 @@ impl ToastLoggerBuilder {
         self
     }
 
+    /// Set a custom function to create the [`Notification`].
+    /// # Examples
+    /// ```
+    /// # use toast_logger_win::{BufferedRecord, Notification, ToastLogger};
+    /// let builder = ToastLogger::builder()
+    ///     .create_notification(|records: &[BufferedRecord]| {
+    ///         let notification = Notification::new_with_records(records);
+    ///         // Change properties of `notification` as needed.
+    ///         notification
+    ///     });
+    /// ```
     pub fn create_notification<F>(&mut self, create: F) -> &mut Self
     where
         F: Fn(&[BufferedRecord]) -> anyhow::Result<Notification> + Send + Sync + 'static,

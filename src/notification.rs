@@ -1,5 +1,5 @@
-#[cfg(feature = "winrt-toast")]
-use std::time::Duration;
+#[cfg(doc)]
+use crate::ToastLoggerBuilder;
 
 /// A struct to own copies of parts of `log::Record` for buffering.
 ///
@@ -30,6 +30,9 @@ impl BufferedRecord {
 }
 
 /// Abstracted notification.
+///
+/// [`ToastLoggerBuilder::create_notification`] allows hooking
+/// before the [`Notification`] is shown.
 pub struct Notification {
     #[cfg(not(feature = "winrt-toast"))]
     inner: crate::win::ToastNotification,
@@ -63,8 +66,14 @@ impl Notification {
         Self::new_with_text(&text)
     }
 
-    #[cfg(feature = "winrt-toast")]
-    pub fn expires_in(&mut self, duration: Duration) {
+    /// Set the expirations of this notification.
+    /// Please see [`ToastNotification.ExpirationTime`].
+    ///
+    /// Available only when the "`winrt-toast`" feature is enabled.
+    ///
+    /// [`ToastNotification.ExpirationTime`]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotification.expirationtime
+    #[cfg(any(feature = "winrt-toast", doc))]
+    pub fn expires_in(&mut self, duration: std::time::Duration) {
         self.inner.expires_in(duration);
     }
 }
