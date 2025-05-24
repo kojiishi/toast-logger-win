@@ -23,14 +23,14 @@ pub struct ToastNotification {
 
 impl ToastNotification {
     /// Create a `win::ToastNotification` with the given text.
-    /// # Examples
-    /// ```
-    /// # use toast_logger_win::win::{ToastNotification, ToastNotifier};
-    /// fn show_text(notifier: &ToastNotifier, text: &str) -> anyhow::Result<()> {
-    ///     let notification = ToastNotification::new_with_text(text)?;
-    ///     notifier.show(&notification)
-    /// }
-    /// ```
+    // # Examples
+    // ```
+    // # use toast_logger_win::win::{ToastNotification, ToastNotifier};
+    // fn show_text(notifier: &ToastNotifier, text: &str) -> anyhow::Result<()> {
+    //     let notification = ToastNotification::new_with_text(text)?;
+    //     notifier.show(&notification)
+    // }
+    // ```
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
         let template = winapi::ToastTemplateType::ToastText01;
         let toast_xml = winapi::ToastNotificationManager::GetTemplateContent(template)?;
