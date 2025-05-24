@@ -58,7 +58,7 @@ impl Notification {
 }
 
 /// Abstracted notifier for the `Notification`.
-pub struct Notifier {
+pub(crate) struct Notifier {
     #[cfg(not(feature = "winrt-toast"))]
     inner: crate::win::ToastNotifier,
     #[cfg(feature = "winrt-toast")]
