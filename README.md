@@ -13,7 +13,7 @@
 
 `ToastLogger` is a [`log`] crate logger that sends logging output
 to the [Windows Toast Notifications].
-This is handy when you want to present a small amount of text to users
+This is handy when you want to present errors or a small amount of text to users
 from UI-less applications on Windows.
 
 The following example shows a toast notification saying "Hello, world".
