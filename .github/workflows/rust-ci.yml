@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build
-        run: cargo build --all-features --verbose
+        run: cargo build --all-features
 
       - name: Doc and examples
         run: |

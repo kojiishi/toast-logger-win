@@ -2,6 +2,10 @@
 use std::time::Duration;
 
 /// A struct to own copies of parts of `log::Record` for buffering.
+///
+/// The `log::Record` has lifetime for the lower overhead,
+/// and it's not suitable to buffer them.
+/// This struct captures the data needed for longer lifetime.
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferedRecord {
     pub level: log::Level,
@@ -14,6 +18,14 @@ impl BufferedRecord {
             level: record.level(),
             args: args.to_string(),
         }
+    }
+
+    pub fn level(&self) -> log::Level {
+        self.level
+    }
+
+    pub fn args(&self) -> &str {
+        &self.args
     }
 }
 
