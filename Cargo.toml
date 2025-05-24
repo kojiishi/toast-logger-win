@@ -1,6 +1,6 @@
 [package]
 name = "toast-logger-win"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 authors = ["Koji Ishii <kojiishi@gmail.com>"]
 description = "Rust's `log` crate logger that sends logging output to the Windows Toast Notifications."
