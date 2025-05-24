@@ -1,3 +1,6 @@
+#[cfg(feature = "winrt-toast")]
+use std::time::Duration;
+
 /// A struct to own copies of parts of `log::Record` for buffering.
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferedRecord {
@@ -46,6 +49,11 @@ impl Notification {
             .collect::<Vec<_>>()
             .join("\n");
         Self::new_with_text(&text)
+    }
+
+    #[cfg(feature = "winrt-toast")]
+    pub fn expires_in(&mut self, duration: Duration) {
+        self.inner.expires_in(duration);
     }
 }
 
