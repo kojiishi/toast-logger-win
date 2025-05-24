@@ -18,5 +18,8 @@
 
 pub(crate) mod win;
 
+mod notification;
+pub use notification::*;
+
 mod toast_logger;
 pub use toast_logger::*;
