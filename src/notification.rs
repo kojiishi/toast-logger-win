@@ -42,18 +42,17 @@ pub struct Notification {
 
 impl Notification {
     /// Construct from a string.
-    #[cfg(not(feature = "winrt-toast"))]
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
         Ok(Self {
+            #[cfg(not(feature = "winrt-toast"))]
             inner: crate::win::ToastNotification::new_with_text(text)?,
+            #[cfg(feature = "winrt-toast")]
+            inner: {
+                let mut toast = winrt_toast::Toast::new();
+                toast.text1(text);
+                toast
+            },
         })
-    }
-
-    #[cfg(feature = "winrt-toast")]
-    pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
-        let mut toast = winrt_toast::Toast::new();
-        toast.text1(text);
-        Ok(Self { inner: toast })
     }
 
     /// Construct from a list of [`BufferedRecord`].
@@ -103,16 +102,11 @@ pub(crate) struct Notifier {
 }
 
 impl Notifier {
-    #[cfg(not(feature = "winrt-toast"))]
     pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
         Ok(Self {
+            #[cfg(not(feature = "winrt-toast"))]
             inner: crate::win::ToastNotifier::new_with_application_id(application_id)?,
-        })
-    }
-
-    #[cfg(feature = "winrt-toast")]
-    pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
-        Ok(Self {
+            #[cfg(feature = "winrt-toast")]
             inner: winrt_toast::ToastManager::new(application_id),
         })
     }
