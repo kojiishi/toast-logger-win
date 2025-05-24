@@ -1,6 +1,7 @@
 //! [`ToastLogger`] is a [`log`] crate logger that sends logging output
 //! to the [Windows Toast Notifications].
-//! This is handy when you want to present a small amount of text to users
+//! This is handy when you want to present errors or
+//! a small amount of text to users
 //! from UI-less applications on Windows.
 //!
 //! The following example shows a toast notification saying "Hello, world".
@@ -8,9 +9,9 @@
 //! # use toast_logger_win::ToastLogger;
 //! # fn test() -> anyhow::Result<()> {
 //! ToastLogger::builder()
-//!     .max_level(log::LevelFilter::Info)
+//!     .max_level(log::LevelFilter::Error)
 //!     .init()?;
-//! log::info!("Hello, world");
+//! log::error!("Hello, world");
 //! # Ok(())
 //! # }
 //! ```

@@ -19,9 +19,9 @@ from UI-less applications on Windows.
 The following example shows a toast notification saying "Hello, world".
 ```rust
 ToastLogger::builder()
-    .max_level(log::LevelFilter::Info)
+    .max_level(log::LevelFilter::Error)
     .init()?;
-log::info!("Hello, world");
+log::error!("Hello, world");
 ```
 
 Please see the [API documentation at docs.rs][docs] for more details,
