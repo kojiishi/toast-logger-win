@@ -22,12 +22,14 @@ pub struct Notification {
 }
 
 impl Notification {
+    /// Construct from a string.
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
         Ok(Self {
             inner: win::ToastNotification::new_with_text(text)?,
         })
     }
 
+    /// Construct from a list of [`BufferedRecord`].
     pub fn new_with_records(records: &[BufferedRecord]) -> anyhow::Result<Self> {
         let text = records
             .iter()
@@ -38,8 +40,8 @@ impl Notification {
     }
 }
 
-/// Abstracted notifier for the `Notification`.
-pub struct Notifier {
+/// Abstracted notifier for the [`Notification`].
+pub(crate) struct Notifier {
     inner: win::ToastNotifier,
 }
 
