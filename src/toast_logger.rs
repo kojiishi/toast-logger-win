@@ -5,19 +5,12 @@ use std::{
 
 use log::Log;
 
-use crate::win::{ToastNotification, ToastNotifier};
-
-/// A struct to own copies of parts of `log::Record` for buffering.
-#[derive(Debug, PartialEq, Eq)]
-pub struct BufferedRecord {
-    pub level: log::Level,
-    pub args: String,
-}
+use crate::{BufferedRecord, Notification, Notifier};
 
 type LogRecordFormatter =
     dyn Fn(&mut dyn fmt::Write, &log::Record) -> fmt::Result + Send + Sync + 'static;
 type NotificationCreator =
-    dyn Fn(&[BufferedRecord]) -> anyhow::Result<ToastNotification> + Send + Sync + 'static;
+    dyn Fn(&[BufferedRecord]) -> anyhow::Result<Notification> + Send + Sync + 'static;
 
 struct ToastLoggerConfig {
     max_level: log::LevelFilter,
@@ -32,7 +25,7 @@ impl Default for ToastLoggerConfig {
         Self {
             max_level: log::LevelFilter::Error,
             is_auto_flush: true,
-            application_id: ToastNotifier::DEFAULT_APP_ID.into(),
+            application_id: Self::DEFAULT_APP_ID.into(),
             formatter: Box::new(Self::default_formatter),
             create_notification: Box::new(ToastLogger::default_create_notification),
         }
@@ -40,12 +33,16 @@ impl Default for ToastLoggerConfig {
 }
 
 impl ToastLoggerConfig {
+    // https://github.com/GitHub30/toast-notification-examples
+    const DEFAULT_APP_ID: &str =
+        r"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe";
+
     fn default_formatter(buf: &mut dyn fmt::Write, record: &log::Record) -> fmt::Result {
         write!(buf, "{}: {}", record.level(), record.args())
     }
 
-    fn create_notifier(&self) -> anyhow::Result<ToastNotifier> {
-        ToastNotifier::new_with_application_id(&self.application_id)
+    fn create_notifier(&self) -> anyhow::Result<Notifier> {
+        Notifier::new_with_application_id(&self.application_id)
     }
 }
 
@@ -171,7 +168,7 @@ impl ToastLoggerBuilder {
 
     pub fn create_notification<F>(&mut self, create: F) -> &mut Self
     where
-        F: Fn(&[BufferedRecord]) -> anyhow::Result<ToastNotification> + Send + Sync + 'static,
+        F: Fn(&[BufferedRecord]) -> anyhow::Result<Notification> + Send + Sync + 'static,
     {
         self.config.create_notification = Box::new(create);
         self
@@ -195,7 +192,7 @@ impl ToastLoggerBuilder {
 /// [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
 pub struct ToastLogger {
     config: ToastLoggerConfig,
-    notifier: ToastNotifier,
+    notifier: Notifier,
     records: Mutex<Vec<BufferedRecord>>,
 }
 
@@ -239,15 +236,13 @@ impl ToastLogger {
         logger.flush_result()
     }
 
-    pub fn default_create_notification(
-        records: &[BufferedRecord],
-    ) -> anyhow::Result<ToastNotification> {
+    pub fn default_create_notification(records: &[BufferedRecord]) -> anyhow::Result<Notification> {
         let text = records
             .iter()
             .map(|r| r.args.as_str())
             .collect::<Vec<_>>()
             .join("\n");
-        let notification = ToastNotification::new_with_text(&text)?;
+        let notification = Notification::new_with_text(&text)?;
         Ok(notification)
     }
 
@@ -269,10 +264,7 @@ impl ToastLogger {
         if text.is_empty() {
             return Ok(());
         }
-        let buffered_record = BufferedRecord {
-            level: record.level(),
-            args: text,
-        };
+        let buffered_record = BufferedRecord::new_with_formatted_args(record, &text);
 
         if self.config.is_auto_flush {
             self.show_notification(&[buffered_record])?;
@@ -326,7 +318,10 @@ mod tests {
         let builder = ToastLogger::builder();
         assert_eq!(builder.config.max_level, log::LevelFilter::Error);
         assert!(builder.config.is_auto_flush);
-        assert_eq!(builder.config.application_id, ToastNotifier::DEFAULT_APP_ID);
+        assert_eq!(
+            builder.config.application_id,
+            ToastLoggerConfig::DEFAULT_APP_ID
+        );
     }
 
     #[test]

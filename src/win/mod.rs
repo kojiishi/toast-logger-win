@@ -53,10 +53,6 @@ pub struct ToastNotifier {
 }
 
 impl ToastNotifier {
-    // https://github.com/GitHub30/toast-notification-examples
-    pub(crate) const DEFAULT_APP_ID: &str =
-        r"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe";
-
     pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
         let manager = winapi::ToastNotificationManager::GetDefault()?;
         let notifier = manager.CreateToastNotifierWithId(&application_id.into())?;
