@@ -28,5 +28,5 @@ Please see the [API documentation at docs.rs][docs] for more details,
 and [release notes] for the change history.
 
 [`log`]: https://crates.io/crates/log
-[release notes]: https://github.com/kojiishi/toast-logger-win/releases]
+[release notes]: https://github.com/kojiishi/toast-logger-win/releases
 [Windows Toast Notifications]: https://learn.microsoft.com/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview
