@@ -1,3 +1,5 @@
+use anyhow::Ok;
+
 #[cfg(doc)]
 use crate::ToastLoggerBuilder;
 
@@ -81,12 +83,13 @@ impl Notification {
     /// Set the expirations of this notification.
     /// Please see [`ToastNotification.ExpirationTime`].
     ///
-    /// Available only when the "`winrt-toast`" feature is enabled.
-    ///
     /// [`ToastNotification.ExpirationTime`]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotification.expirationtime
-    #[cfg(any(feature = "winrt-toast", doc))]
-    pub fn expires_in(&mut self, duration: std::time::Duration) {
+    pub fn expires_in(&mut self, duration: std::time::Duration) -> anyhow::Result<()> {
+        #[cfg(not(feature = "winrt-toast"))]
+        self.inner.expires_in(duration)?;
+        #[cfg(feature = "winrt-toast")]
         self.inner.expires_in(duration);
+        Ok(())
     }
 
     /// The inner [`winrt_toast::Toast`].

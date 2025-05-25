@@ -2,9 +2,18 @@
 //! Thin wrappers for the Windows APIs.
 //!
 
+use std::time::Duration;
+
+use windows::core::Interface;
+
 mod winapi {
-    pub use windows::UI::Notifications::{
-        ToastNotification, ToastNotificationManager, ToastNotifier, ToastTemplateType,
+    pub use windows::{
+        Foundation::{DateTime, IReference, PropertyValue},
+        Globalization::Calendar,
+        UI::Notifications::{
+            ToastNotification, ToastNotificationManager, ToastNotifier, ToastTemplateType,
+        },
+        core::IInspectable,
     };
 }
 
@@ -38,6 +47,17 @@ impl ToastNotification {
         text_node.SetInnerText(&text.into())?;
         let notification = winapi::ToastNotification::CreateToastNotification(&toast_xml)?;
         Ok(Self { notification })
+    }
+
+    /// Set the expiration time to the `duration` from the current time.
+    pub fn expires_in(&mut self, duration: Duration) -> anyhow::Result<()> {
+        let win_cal = winapi::Calendar::new()?;
+        win_cal.AddSeconds(duration.as_secs() as i32)?;
+        let dt = win_cal.GetDateTime()?;
+        let dt_obj: winapi::IInspectable = winapi::PropertyValue::CreateDateTime(dt)?;
+        let dt_ref: winapi::IReference<winapi::DateTime> = dt_obj.cast()?;
+        self.notification.SetExpirationTime(&dt_ref)?;
+        Ok(())
     }
 }
 
