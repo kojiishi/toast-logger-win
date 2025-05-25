@@ -126,12 +126,13 @@ impl ToastLoggerBuilder {
 
     /// Set the application ID for the Toast Notification.
     ///
-    /// This is the application ID passed to the Windows
-    /// [`CreateToastNotifier`](https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotificationmanager.createtoastnotifier#windows-ui-notifications-toastnotificationmanager-createtoastnotifier(system-string))
-    /// API.
-    /// Please also see the ["Find the Application User Model ID of an installed app"
-    /// article](https://learn.microsoft.com/windows/configuration/find-the-application-user-model-id-of-an-installed-app)
-    /// to find the Application User Model ID, or AUMID in short.
+    /// This is the application ID passed to the Windows [`CreateToastNotifier`] API.
+    /// Please also see the [Application User Model ID][AUMID],
+    /// and the "[Find the Application User Model ID of an installed app]".
+    /// 
+    /// [AUMID]: https://learn.microsoft.com/windows/win32/shell/appids
+    /// [`CreateToastNotifier`]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotificationmanager.createtoastnotifier#windows-ui-notifications-toastnotificationmanager-createtoastnotifier(system-string)
+    /// [Find the Application User Model ID of an installed app]: https://learn.microsoft.com/windows/configuration/find-the-application-user-model-id-of-an-installed-app
     pub fn application_id(&mut self, application_id: &str) -> &mut Self {
         self.config.application_id = application_id.into();
         self

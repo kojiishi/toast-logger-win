@@ -19,8 +19,8 @@
 //!
 //! # Features
 //!
-//! * The feature `winrt-toast` switches the internal implementation
-//!   of the [Windows Toast Notifications]
+//! * The feature `winrt-toast` switches
+//!   the underlying implementation
 //!   from the [`windows` crate] to the [`winrt-toast` crate].
 //!   Please see the [`Notification`] for more details.
 //!
