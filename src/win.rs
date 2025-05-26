@@ -4,18 +4,14 @@
 
 use std::time::Duration;
 
-use windows::core::Interface;
-
-mod winapi {
-    pub use windows::{
-        Foundation::{DateTime, IReference, PropertyValue},
-        Globalization::Calendar,
-        UI::Notifications::{
-            ToastNotification, ToastNotificationManager, ToastNotifier, ToastTemplateType,
-        },
-        core::IInspectable,
-    };
-}
+use windows::{
+    Foundation::{DateTime, IReference, PropertyValue},
+    Globalization::Calendar,
+    UI::Notifications::{
+        ToastNotification, ToastNotificationManager, ToastNotifier, ToastTemplateType,
+    },
+    core::{IInspectable, Interface},
+};
 
 /// Represents a Toast Notification.
 ///
@@ -26,11 +22,11 @@ mod winapi {
 /// [`windows::UI::Notifications::ToastNotification`]: https://microsoft.github.io/windows-docs-rs/doc/windows/UI/Notifications/struct.ToastNotification.html
 /// [`Windows.UI.Notifications.ToastNotification` class]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotification
 #[derive(Debug)]
-pub struct ToastNotification {
-    notification: winapi::ToastNotification,
+pub struct NotificationImpl {
+    notification: ToastNotification,
 }
 
-impl ToastNotification {
+impl NotificationImpl {
     /// Create a `win::ToastNotification` with the given text.
     // # Examples
     // ```
@@ -41,21 +37,21 @@ impl ToastNotification {
     // }
     // ```
     pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
-        let template = winapi::ToastTemplateType::ToastText01;
-        let toast_xml = winapi::ToastNotificationManager::GetTemplateContent(template)?;
+        let template = ToastTemplateType::ToastText01;
+        let toast_xml = ToastNotificationManager::GetTemplateContent(template)?;
         let text_node = toast_xml.SelectSingleNode(&"//text[@id=\"1\"]".into())?;
         text_node.SetInnerText(&text.into())?;
-        let notification = winapi::ToastNotification::CreateToastNotification(&toast_xml)?;
+        let notification = ToastNotification::CreateToastNotification(&toast_xml)?;
         Ok(Self { notification })
     }
 
     /// Set the expiration time to the `duration` from the current time.
     pub fn expires_in(&mut self, duration: Duration) -> anyhow::Result<()> {
-        let win_cal = winapi::Calendar::new()?;
+        let win_cal = Calendar::new()?;
         win_cal.AddSeconds(duration.as_secs() as i32)?;
         let dt = win_cal.GetDateTime()?;
-        let dt_obj: winapi::IInspectable = winapi::PropertyValue::CreateDateTime(dt)?;
-        let dt_ref: winapi::IReference<winapi::DateTime> = dt_obj.cast()?;
+        let dt_obj: IInspectable = PropertyValue::CreateDateTime(dt)?;
+        let dt_ref: IReference<DateTime> = dt_obj.cast()?;
         self.notification.SetExpirationTime(&dt_ref)?;
         Ok(())
     }
@@ -68,18 +64,18 @@ impl ToastNotification {
 /// [`windows::UI::Notifications::ToastNotifier`]: https://microsoft.github.io/windows-docs-rs/doc/windows/UI/Notifications/struct.ToastNotifier.html
 /// [`Windows.UI.Notifications.ToastNotifier` class]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotifier
 #[derive(Debug)]
-pub struct ToastNotifier {
-    notifier: winapi::ToastNotifier,
+pub struct NotifierImpl {
+    notifier: ToastNotifier,
 }
 
-impl ToastNotifier {
+impl NotifierImpl {
     pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
-        let manager = winapi::ToastNotificationManager::GetDefault()?;
+        let manager = ToastNotificationManager::GetDefault()?;
         let notifier = manager.CreateToastNotifierWithId(&application_id.into())?;
         Ok(Self { notifier })
     }
 
-    pub fn show(&self, notification: &ToastNotification) -> anyhow::Result<()> {
+    pub fn show(&self, notification: &NotificationImpl) -> anyhow::Result<()> {
         self.notifier.Show(&notification.notification)?;
         Ok(())
     }
