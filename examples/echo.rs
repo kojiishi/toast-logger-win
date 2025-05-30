@@ -1,8 +1,8 @@
 use std::env;
 
-use toast_logger_win::ToastLogger;
+use toast_logger_win::{Result, ToastLogger};
 
-pub fn main() -> anyhow::Result<()> {
+pub fn main() -> Result<()> {
     ToastLogger::builder()
         .max_level(log::LevelFilter::Info)
         .init()?;

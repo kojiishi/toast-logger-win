@@ -13,6 +13,8 @@ use windows::{
     core::{IInspectable, Interface},
 };
 
+use crate::Result;
+
 /// Represents a Toast Notification.
 ///
 /// A thin wrapper for the [`windows::UI::Notifications::ToastNotification`].
@@ -31,12 +33,12 @@ impl NotificationImpl {
     // # Examples
     // ```
     // # use toast_logger_win::win::{ToastNotification, ToastNotifier};
-    // fn show_text(notifier: &ToastNotifier, text: &str) -> anyhow::Result<()> {
+    // fn show_text(notifier: &ToastNotifier, text: &str) -> Result<()> {
     //     let notification = ToastNotification::new_with_text(text)?;
     //     notifier.show(&notification)
     // }
     // ```
-    pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
+    pub fn new_with_text(text: &str) -> Result<Self> {
         let template = ToastTemplateType::ToastText01;
         let toast_xml = ToastNotificationManager::GetTemplateContent(template)?;
         let text_node = toast_xml.SelectSingleNode(&"//text[@id=\"1\"]".into())?;
@@ -46,7 +48,7 @@ impl NotificationImpl {
     }
 
     /// Set the expiration time to the `duration` from the current time.
-    pub fn expires_in(&mut self, duration: Duration) -> anyhow::Result<()> {
+    pub fn expires_in(&mut self, duration: Duration) -> Result<()> {
         let win_cal = Calendar::new()?;
         win_cal.AddSeconds(duration.as_secs() as i32)?;
         let dt = win_cal.GetDateTime()?;
@@ -69,13 +71,13 @@ pub struct NotifierImpl {
 }
 
 impl NotifierImpl {
-    pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
+    pub fn new_with_application_id(application_id: &str) -> Result<Self> {
         let manager = ToastNotificationManager::GetDefault()?;
         let notifier = manager.CreateToastNotifierWithId(&application_id.into())?;
         Ok(Self { notifier })
     }
 
-    pub fn show(&self, notification: &NotificationImpl) -> anyhow::Result<()> {
+    pub fn show(&self, notification: &NotificationImpl) -> Result<()> {
         self.notifier.Show(&notification.notification)?;
         Ok(())
     }

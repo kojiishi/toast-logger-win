@@ -6,8 +6,8 @@
 //!
 //! The following example shows a toast notification saying "Hello, world".
 //! ```no_run
-//! # use toast_logger_win::ToastLogger;
-//! # fn test() -> anyhow::Result<()> {
+//! # use toast_logger_win::{Result, ToastLogger};
+//! # fn test() -> Result<()> {
 //! ToastLogger::builder()
 //!     .max_level(log::LevelFilter::Error)
 //!     .init()?;
@@ -35,3 +35,25 @@ pub use notification::*;
 
 mod toast_logger;
 pub use toast_logger::*;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error(transparent)]
+    Format(#[from] std::fmt::Error),
+
+    #[error("ToastLogger not initialized")]
+    NotInitialized,
+
+    #[error(transparent)]
+    SetLogger(#[from] log::SetLoggerError),
+
+    #[cfg(not(feature = "winrt-toast"))]
+    #[error("Windows Error: {0}")]
+    Windows(#[from] windows::core::Error),
+
+    #[cfg(feature = "winrt-toast")]
+    #[error("winrt_toast Error: {0}")]
+    WinToast(#[from] winrt_toast::WinToastError),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
