@@ -1,4 +1,4 @@
-use anyhow::Ok;
+use crate::Result;
 
 #[cfg(doc)]
 use crate::ToastLoggerBuilder;
@@ -57,7 +57,7 @@ pub struct Notification {
 
 impl Notification {
     /// Construct from a string.
-    pub fn new_with_text(text: &str) -> anyhow::Result<Self> {
+    pub fn new_with_text(text: &str) -> Result<Self> {
         Ok(Self {
             #[cfg(not(feature = "winrt-toast"))]
             inner: crate::win::NotificationImpl::new_with_text(text)?,
@@ -71,7 +71,7 @@ impl Notification {
     }
 
     /// Construct from a list of [`BufferedRecord`].
-    pub fn new_with_records(records: &[BufferedRecord]) -> anyhow::Result<Self> {
+    pub fn new_with_records(records: &[BufferedRecord]) -> Result<Self> {
         let text = records
             .iter()
             .map(|r| r.args.as_str())
@@ -84,7 +84,7 @@ impl Notification {
     /// Please see [`ToastNotification.ExpirationTime`].
     ///
     /// [`ToastNotification.ExpirationTime`]: https://learn.microsoft.com/uwp/api/windows.ui.notifications.toastnotification.expirationtime
-    pub fn expires_in(&mut self, duration: std::time::Duration) -> anyhow::Result<()> {
+    pub fn expires_in(&mut self, duration: std::time::Duration) -> Result<()> {
         #[cfg(not(feature = "winrt-toast"))]
         self.inner.expires_in(duration)?;
         #[cfg(feature = "winrt-toast")]
@@ -118,7 +118,7 @@ pub(crate) struct Notifier {
 }
 
 impl Notifier {
-    pub fn new_with_application_id(application_id: &str) -> anyhow::Result<Self> {
+    pub fn new_with_application_id(application_id: &str) -> Result<Self> {
         Ok(Self {
             #[cfg(not(feature = "winrt-toast"))]
             inner: crate::win::NotifierImpl::new_with_application_id(application_id)?,
@@ -127,7 +127,7 @@ impl Notifier {
         })
     }
 
-    pub fn show(&self, notification: &Notification) -> anyhow::Result<()> {
+    pub fn show(&self, notification: &Notification) -> Result<()> {
         self.inner.show(&notification.inner)?;
         Ok(())
     }

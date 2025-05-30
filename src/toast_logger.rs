@@ -5,12 +5,12 @@ use std::{
 
 use log::Log;
 
-use crate::{BufferedRecord, Notification, Notifier};
+use crate::{BufferedRecord, Notification, Notifier, Result};
 
 type LogRecordFormatter =
     dyn Fn(&mut dyn fmt::Write, &log::Record) -> fmt::Result + Send + Sync + 'static;
 type NotificationCreator =
-    dyn Fn(&[BufferedRecord]) -> anyhow::Result<Notification> + Send + Sync + 'static;
+    dyn Fn(&[BufferedRecord]) -> Result<Notification> + Send + Sync + 'static;
 
 struct ToastLoggerConfig {
     max_level: log::LevelFilter,
@@ -41,7 +41,7 @@ impl ToastLoggerConfig {
         write!(buf, "{}: {}", record.level(), record.args())
     }
 
-    fn create_notifier(&self) -> anyhow::Result<Notifier> {
+    fn create_notifier(&self) -> Result<Notifier> {
         Notifier::new_with_application_id(&self.application_id)
     }
 }
@@ -50,8 +50,8 @@ impl ToastLoggerConfig {
 ///
 /// # Examples
 /// ```no_run
-/// # use toast_logger_win::ToastLogger;
-/// # fn test() -> anyhow::Result<()> {
+/// # use toast_logger_win::{Result, ToastLogger};
+/// # fn test() -> Result<()> {
 /// ToastLogger::builder().init()?;
 /// # Ok(())
 /// # }
@@ -68,12 +68,12 @@ impl ToastLoggerBuilder {
 
     /// Initialize the [`log`] crate to use the [`ToastLogger`]
     /// with the configurations set to this builder.
-    pub fn init(&mut self) -> anyhow::Result<()> {
+    pub fn init(&mut self) -> Result<()> {
         ToastLogger::init(self.build_config())
     }
 
     #[deprecated(since = "0.2.0", note = "Use `init()` instead")]
-    pub fn init_logger(&mut self) -> anyhow::Result<()> {
+    pub fn init_logger(&mut self) -> Result<()> {
         self.init()
     }
 
@@ -81,7 +81,7 @@ impl ToastLoggerBuilder {
     ///
     /// The returned logger implements the [`Log`] trait
     /// and can be installed manually or nested within another logger.
-    pub fn build(&mut self) -> anyhow::Result<ToastLogger> {
+    pub fn build(&mut self) -> Result<ToastLogger> {
         ToastLogger::new(self.build_config())
     }
 
@@ -107,8 +107,8 @@ impl ToastLoggerBuilder {
     /// which shows a toast notification on each logging.
     /// # Examples
     /// ```no_run
-    /// # use toast_logger_win::ToastLogger;
-    /// # fn test() -> anyhow::Result<()> {
+    /// # use toast_logger_win::{Result, ToastLogger};
+    /// # fn test() -> Result<()> {
     /// ToastLogger::builder()
     ///     .max_level(log::LevelFilter::Info)
     ///     .auto_flush(false)
@@ -146,8 +146,8 @@ impl ToastLoggerBuilder {
     /// # Examples
     /// ```no_run
     /// # use std::fmt;
-    /// # use toast_logger_win::ToastLogger;
-    /// # fn test() -> anyhow::Result<()> {
+    /// # use toast_logger_win::{Result, ToastLogger};
+    /// # fn test() -> Result<()> {
     /// ToastLogger::builder()
     ///     .format(|buf: &mut dyn fmt::Write, record: &log::Record| {
     ///         match record.level() {
@@ -180,7 +180,7 @@ impl ToastLoggerBuilder {
     /// ```
     pub fn create_notification<F>(&mut self, create: F) -> &mut Self
     where
-        F: Fn(&[BufferedRecord]) -> anyhow::Result<Notification> + Send + Sync + 'static,
+        F: Fn(&[BufferedRecord]) -> Result<Notification> + Send + Sync + 'static,
     {
         self.config.create_notification = Box::new(create);
         self
@@ -193,8 +193,8 @@ impl ToastLoggerBuilder {
 ///
 /// # Examples
 /// ```no_run
-/// # use toast_logger_win::ToastLogger;
-/// # pub fn test() -> anyhow::Result<()> {
+/// # use toast_logger_win::{Result, ToastLogger};
+/// # pub fn test() -> Result<()> {
 ///   ToastLogger::builder()
 ///       .max_level(log::LevelFilter::Info)
 ///       .init()?;
@@ -218,7 +218,7 @@ impl ToastLogger {
         ToastLoggerBuilder::new()
     }
 
-    fn init(config: ToastLoggerConfig) -> anyhow::Result<()> {
+    fn init(config: ToastLoggerConfig) -> Result<()> {
         log::set_max_level(config.max_level);
         if INSTANCE.set(Self::new(config)?).is_err() {
             panic!("ToastLogger already initialized.");
@@ -227,7 +227,7 @@ impl ToastLogger {
         Ok(())
     }
 
-    fn new(config: ToastLoggerConfig) -> anyhow::Result<Self> {
+    fn new(config: ToastLoggerConfig) -> Result<Self> {
         let notifier = config.create_notifier()?;
         Ok(Self {
             config,
@@ -242,10 +242,8 @@ impl ToastLogger {
     /// by concatenating all logs in the buffer.
     ///
     /// Please see [`ToastLoggerBuilder::auto_flush()`] for more details.
-    pub fn flush() -> anyhow::Result<()> {
-        let logger = INSTANCE
-            .get()
-            .ok_or_else(|| anyhow::anyhow!("ToastLogger not initialized."))?;
+    pub fn flush() -> Result<()> {
+        let logger = INSTANCE.get().ok_or_else(|| crate::Error::NotInitialized)?;
         logger.flush_result()
     }
 
@@ -257,7 +255,7 @@ impl ToastLogger {
         Some(mem::take(&mut *records))
     }
 
-    fn log_result(&self, record: &log::Record) -> anyhow::Result<()> {
+    fn log_result(&self, record: &log::Record) -> Result<()> {
         if !self.enabled(record.metadata()) {
             return Ok(());
         }
@@ -280,14 +278,14 @@ impl ToastLogger {
         Ok(())
     }
 
-    fn flush_result(&self) -> anyhow::Result<()> {
+    fn flush_result(&self) -> Result<()> {
         if let Some(records) = self.take_records() {
             return self.show_notification(&records);
         }
         Ok(())
     }
 
-    fn show_notification(&self, records: &[BufferedRecord]) -> anyhow::Result<()> {
+    fn show_notification(&self, records: &[BufferedRecord]) -> Result<()> {
         let notification = (self.config.create_notification)(records)?;
         self.notifier.show(&notification)?;
         Ok(())
@@ -328,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn max_level() -> anyhow::Result<()> {
+    fn max_level() -> Result<()> {
         let logger = ToastLogger::builder()
             .max_level(log::LevelFilter::Info)
             .auto_flush(false)
@@ -355,7 +353,7 @@ mod tests {
     }
 
     #[test]
-    fn format() -> anyhow::Result<()> {
+    fn format() -> Result<()> {
         let logger = ToastLogger::builder()
             .max_level(log::LevelFilter::Info)
             .auto_flush(false)
