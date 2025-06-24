@@ -3,9 +3,9 @@ use crate::Result;
 #[cfg(doc)]
 use crate::ToastLoggerBuilder;
 
-/// A struct to own copies of parts of `log::Record` for buffering.
+/// A struct to own copies of parts of [`log::Record`] for buffering.
 ///
-/// The `log::Record` has lifetime for the lower overhead,
+/// The [`log::Record`] has lifetime for the lower overhead,
 /// and it's not suitable to buffer them.
 /// This struct captures the data needed for longer lifetime.
 #[derive(Debug, PartialEq, Eq)]
@@ -96,6 +96,7 @@ impl Notification {
     ///
     /// Available only when the "`winrt-toast`" feature is enabled.
     #[cfg(feature = "winrt-toast")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
     pub fn inner(&self) -> &winrt_toast::Toast {
         &self.inner
     }
@@ -104,6 +105,7 @@ impl Notification {
     ///
     /// Available only when the "`winrt-toast`" feature is enabled.
     #[cfg(feature = "winrt-toast")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
     pub fn inner_mut(&mut self) -> &mut winrt_toast::Toast {
         &mut self.inner
     }
