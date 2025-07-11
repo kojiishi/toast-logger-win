@@ -8,7 +8,7 @@ pub fn main() -> Result<()> {
         .init()?;
 
     for arg in env::args().skip(1) {
-        log::info!("{}", arg);
+        log::info!("{arg}");
     }
     Ok(())
 }
