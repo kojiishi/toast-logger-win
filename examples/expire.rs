@@ -24,6 +24,6 @@ pub fn main() -> anyhow::Result<()> {
     };
     builder.max_level(log::LevelFilter::Info).init()?;
 
-    log::info!("{}", message);
+    log::info!("{message}");
     Ok(())
 }
