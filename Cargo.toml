@@ -13,7 +13,7 @@ exclude = [".github", ".gitignore", "hooks", ".vscode"]
 [dependencies]
 anyhow = "1.0.99"
 log = { version = "0.4.27", features = ["std"] }
-thiserror = "2.0.12"
+thiserror = "2.0.16"
 winrt-toast = { version = "0.1.1", optional = true }
 
 [dependencies.windows]
