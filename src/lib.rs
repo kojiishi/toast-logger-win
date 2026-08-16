@@ -27,6 +27,8 @@
 //! [`winrt-toast` crate]: https://docs.rs/winrt-toast/latest/winrt_toast/
 //! [`windows` crate]: https://crates.io/crates/windows
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(not(feature = "winrt-toast"))]
 pub(crate) mod win;
 
