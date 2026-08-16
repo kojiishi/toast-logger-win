@@ -1,3 +1,4 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
 use crate::Result;
 
 #[cfg(doc)]
@@ -93,9 +94,8 @@ impl Notification {
     }
 
     /// The inner [`winrt_toast::Toast`].
-    ///
-    /// Available only when the "`winrt-toast`" feature is enabled.
     #[cfg(feature = "winrt-toast")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
     // error[E0658]: `#[doc(cfg)]` is experimental
     // https://github.com/rust-lang/rust/issues/43781
     // #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
@@ -104,12 +104,8 @@ impl Notification {
     }
 
     /// The mutable inner [`winrt_toast::Toast`].
-    ///
-    /// Available only when the "`winrt-toast`" feature is enabled.
     #[cfg(feature = "winrt-toast")]
-    // error[E0658]: `#[doc(cfg)]` is experimental
-    // https://github.com/rust-lang/rust/issues/43781
-    // #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "winrt-toast")))]
     pub fn inner_mut(&mut self) -> &mut winrt_toast::Toast {
         &mut self.inner
     }
