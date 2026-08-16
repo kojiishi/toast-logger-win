@@ -1,4 +1,3 @@
-#![cfg_attr(docsrs, feature(doc_cfg))]
 use crate::Result;
 
 #[cfg(doc)]
