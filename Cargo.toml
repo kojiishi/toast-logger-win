@@ -1,14 +1,15 @@
 [package]
 name = "toast-logger-win"
-version = "0.5.5"
+version = "0.5.6"
 edition = "2024"
-authors = ["Koji Ishii <kojiishi@gmail.com>"]
 description = "Rust's `log` crate logger that sends logging output to the Windows Toast Notifications."
-keywords = ["log", "windows", "notifications", "toast"]
-repository = "https://github.com/kojiishi/toast-logger-win"
-readme = "README.md"
+authors = ["Koji Ishii <kojiishi@gmail.com>"]
 license = "Apache-2.0"
-exclude = [".github", ".gitignore", "hooks", ".vscode"]
+repository = "https://github.com/kojiishi/toast-logger-win"
+documentation = "https://docs.rs/toast-logger-win/"
+readme = "README.md"
+keywords = ["log", "windows", "notifications", "toast"]
+exclude = [".github", ".gitignore", ".vscode", "Taskfile.yml"]
 
 [dependencies]
 anyhow = "1.0.102"
